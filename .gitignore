@@ -1,0 +1,8 @@
+.langgraph_api
+__pycache__
+.venv
+.env
+qdrant_db
+database
+*.egg-info
+.ipynb_checkpoints
