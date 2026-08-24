@@ -148,3 +148,65 @@ uv run uvicorn api.main:app --app-dir src --port 8000
 ```bash
 uv run streamlit run src/demo/streamlit_example.py
 ```
+
+> 노트북·Streamlit 데모·데이터 적재에 쓰는 패키지(jupyter, streamlit, PyMuPDF, pandas, supabase 등)는
+> `pyproject.toml`의 `[dependency-groups].dev`로 분리돼 있습니다.
+> `uv sync`는 dev 그룹까지 설치하므로 로컬 개발에는 차이가 없고, 배포 이미지에서만 제외됩니다.
+
+---
+
+## 5. 배포 (Render)
+
+FastAPI가 SSE로 응답을 흘려보내므로 서버리스 대신 상시 구동 서버가 필요합니다.
+`Dockerfile` 하나로 프론트엔드 빌드와 API 서버를 함께 패키징해 Render에 올립니다.
+
+```
+Dockerfile
+ ├─ 1단계 node:20-slim   npm ci → vite build → web/dist
+ └─ 2단계 python:3.12    uv sync --no-dev → src/ + examples/ + web/dist
+                          uvicorn api.main:app --port $PORT
+```
+
+### 최초 1회 설정
+
+1. <https://dashboard.render.com> 에서 **New > Blueprint** 선택
+2. GitHub 저장소(`26-smu-ai-bootcamp`) 연결 → 루트의 `render.yaml`이 자동 인식됨
+3. `sync: false`로 표시된 환경 변수 값을 입력 (커밋되지 않으므로 여기서만 설정)
+
+   | 변수 | 비고 |
+   | --- | --- |
+   | `OPENAI_API_KEY` | 필수 |
+   | `QDRANT_URL`, `QDRANT_API_KEY` | 필수 |
+   | `SUPABASE_DB_URL` | 필수 |
+
+4. **Apply** → 첫 배포 시작 (Docker 빌드 약 5~10분)
+
+배포가 끝나면 `https://<서비스명>.onrender.com` 하나로 웹 UI와 API가 모두 열립니다.
+
+### 자동 재배포
+
+* `render.yaml`의 `autoDeploy: true` → **main 브랜치에 push되면 Render가 자동으로 재배포**합니다.
+* `.githooks/post-commit` → **커밋하면 자동으로 push**합니다. 아래 명령으로 활성화합니다.
+
+```bash
+git config core.hooksPath .githooks
+```
+
+| 상황 | 방법 |
+| --- | --- |
+| 이번 커밋만 배포 안 함 | `SKIP_AUTO_DEPLOY=1 git commit -m "..."` |
+| 자동 push 끄기 | `git config --unset core.hooksPath` |
+
+main이 아닌 브랜치이거나 rebase/merge 진행 중일 때는 훅이 push하지 않습니다.
+
+### 로컬에서 배포 이미지 확인
+
+```bash
+docker build -t cheongnyeon-housing .
+docker run --rm --env-file .env -p 8000:8000 cheongnyeon-housing
+```
+
+### 참고
+
+* Render 무료 플랜은 15분간 요청이 없으면 슬립 상태가 되어 첫 요청이 30초 이상 걸릴 수 있습니다.
+* `src/ai/nodes.py`가 import 시점에 LLM을 초기화하므로, 환경 변수가 비어 있으면 서버가 기동되지 않고 배포가 실패합니다.
