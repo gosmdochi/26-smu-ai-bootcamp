@@ -1,0 +1,128 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Malgun Gothic',
+    'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'D2Coding', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-brand-50: #f1f4ff;
+  --color-brand-100: #e3e9ff;
+  --color-brand-200: #c9d3ff;
+  --color-brand-300: #a5b3fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-100 text-slate-900 antialiased;
+  word-break: keep-all;
+}
+
+/* 얇은 스크롤바 */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-slate-300) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-slate-300);
+  border-radius: 9999px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* --------------------------------------------------------------
+   마크다운 답변 본문 스타일
+   -------------------------------------------------------------- */
+.md {
+  @apply text-[15px] leading-7 text-slate-800;
+}
+.md > * + * {
+  @apply mt-3;
+}
+.md h1 {
+  @apply mt-5 text-lg font-bold text-slate-900;
+}
+.md h2 {
+  @apply mt-5 text-base font-bold text-slate-900;
+}
+.md h3,
+.md h4 {
+  @apply mt-4 text-[15px] font-semibold text-slate-900;
+}
+.md p {
+  @apply leading-7;
+}
+.md strong {
+  @apply font-semibold text-slate-900;
+}
+.md a {
+  @apply text-brand-600 underline underline-offset-2 hover:text-brand-700;
+}
+.md ul {
+  @apply list-disc space-y-1 pl-5;
+}
+.md ol {
+  @apply list-decimal space-y-1 pl-5;
+}
+.md li::marker {
+  @apply text-slate-400;
+}
+.md blockquote {
+  @apply border-l-4 border-brand-200 bg-brand-50/60 py-2 pl-4 text-slate-700;
+}
+.md code {
+  @apply rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[13px] text-brand-700;
+}
+.md pre {
+  @apply overflow-x-auto rounded-xl bg-slate-900 p-4;
+}
+.md pre code {
+  @apply bg-transparent p-0 text-[13px] text-slate-100;
+}
+.md hr {
+  @apply border-slate-200;
+}
+.md table {
+  @apply w-full border-collapse overflow-hidden rounded-lg text-sm;
+}
+.md thead {
+  @apply bg-slate-100;
+}
+.md th {
+  @apply border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700;
+}
+.md td {
+  @apply border border-slate-200 px-3 py-2 align-top text-slate-700;
+}
+
+/* 스트리밍 중 커서 */
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.caret {
+  @apply ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 rounded-full bg-brand-500;
+  animation: caret-blink 1s step-end infinite;
+}
