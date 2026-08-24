@@ -199,6 +199,24 @@ git config core.hooksPath .githooks
 
 main이 아닌 브랜치이거나 rebase/merge 진행 중일 때는 훅이 push하지 않습니다.
 
+### 슬립 방지 (keep-alive)
+
+Render 무료 플랜은 15분간 요청이 없으면 슬립 상태가 되어 첫 요청이 30초 이상 걸립니다.
+`.github/workflows/keep-alive.yml`이 **5분마다 `/api/health`를 호출**해 인스턴스를 깨어 있게 유지합니다.
+
+배포로 URL을 받은 뒤 저장소 변수 한 개만 등록하면 동작합니다.
+
+1. GitHub 저장소 > **Settings > Secrets and variables > Actions > Variables** 탭
+2. **New repository variable**
+   * Name: `SERVICE_URL`
+   * Value: `https://<서비스명>.onrender.com` (끝에 `/` 없이)
+3. **Actions** 탭 > `keep-alive` > **Run workflow**로 즉시 동작 확인
+
+| 상황 | 방법 |
+| --- | --- |
+| 잠시 끄기 | Actions 탭 > `keep-alive` > `...` > Disable workflow |
+| 간격 조정 | `keep-alive.yml`의 `cron` 값 수정 |
+
 ### 로컬에서 배포 이미지 확인
 
 ```bash
@@ -208,5 +226,9 @@ docker run --rm --env-file .env -p 8000:8000 cheongnyeon-housing
 
 ### 참고
 
-* Render 무료 플랜은 15분간 요청이 없으면 슬립 상태가 되어 첫 요청이 30초 이상 걸릴 수 있습니다.
 * `src/ai/nodes.py`가 import 시점에 LLM을 초기화하므로, 환경 변수가 비어 있으면 서버가 기동되지 않고 배포가 실패합니다.
+* GitHub의 cron은 best-effort라 5분 간격이 지켜지지 않을 수 있습니다. 슬립이 계속 생기면
+  [cron-job.org](https://cron-job.org)나 UptimeRobot 같은 외부 모니터로 같은 URL을 호출하는 편이 안정적입니다.
+* 저장소에 60일간 활동이 없으면 GitHub이 예약 워크플로를 자동으로 비활성화합니다.
+* Render 무료 인스턴스 시간은 계정당 월 750시간입니다. 24시간 깨워두면 한 달에 약 730시간을 써서
+  무료 서비스를 하나만 돌릴 수 있습니다.

@@ -1,0 +1,53 @@
+# Render 무료 플랜은 15분간 요청이 없으면 슬립 상태가 되어 첫 요청이 30초 이상 걸립니다.
+# 5분마다 /api/health 를 호출해 인스턴스를 깨어 있게 유지합니다.
+#
+# 사전 설정 (1회):
+#   GitHub 저장소 > Settings > Secrets and variables > Actions > Variables 탭
+#   > New repository variable
+#     Name : SERVICE_URL
+#     Value: https://<Render에서 발급받은 서비스명>.onrender.com   (끝에 / 없이)
+
+name: keep-alive
+
+on:
+  schedule:
+    # GitHub의 cron은 best-effort라 실제로는 5~15분 간격으로 실행될 수 있습니다.
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # 수동 실행 (설정 직후 동작 확인용)
+
+# 콜드 스타트로 이전 실행이 길어져도 핑이 겹쳐 쌓이지 않게 합니다.
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    # 포크된 저장소에서는 실행하지 않습니다.
+    if: github.repository == 'gosmdochi/26-smu-ai-bootcamp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping /api/health
+        env:
+          SERVICE_URL: ${{ vars.SERVICE_URL }}
+        run: |
+          if [ -z "$SERVICE_URL" ]; then
+            echo "::error::SERVICE_URL 저장소 변수가 설정되지 않았습니다."
+            echo "Settings > Secrets and variables > Actions > Variables 에서"
+            echo "SERVICE_URL = https://<서비스명>.onrender.com 을 추가하세요."
+            exit 1
+          fi
+
+          # 슬립에서 깨어나는 데 30초 이상 걸릴 수 있어 넉넉히 기다리고 재시도합니다.
+          status=$(curl -sS -o /tmp/health.json -w '%{http_code}' \
+            --max-time 90 --retry 3 --retry-delay 15 --retry-all-errors \
+            "$SERVICE_URL/api/health")
+
+          echo "HTTP $status"
+          cat /tmp/health.json 2>/dev/null || true
+          echo
+
+          if [ "$status" != "200" ]; then
+            echo "::error::헬스체크 실패 (HTTP $status)"
+            exit 1
+          fi
