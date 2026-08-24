@@ -1,0 +1,29 @@
+#!/bin/sh
+# main 브랜치에 커밋하면 곧바로 origin에 push하고, Render가 자동으로 재배포합니다.
+#
+# 활성화:   git config core.hooksPath .githooks
+# 끄기:     git config --unset core.hooksPath
+# 1회 건너뛰기: SKIP_AUTO_DEPLOY=1 git commit -m "..."
+
+[ -n "$SKIP_AUTO_DEPLOY" ] && exit 0
+
+# rebase / merge / cherry-pick 진행 중에는 중간 커밋마다 push하지 않습니다.
+git_dir=$(git rev-parse --git-dir)
+for state in rebase-merge rebase-apply MERGE_HEAD CHERRY_PICK_HEAD BISECT_LOG; do
+  [ -e "$git_dir/$state" ] && exit 0
+done
+
+branch=$(git symbolic-ref --short -q HEAD)
+if [ "$branch" != "main" ]; then
+  echo "[auto-deploy] $branch 브랜치라 push하지 않습니다 (main만 배포)."
+  exit 0
+fi
+
+echo "[auto-deploy] origin/main으로 push합니다..."
+if git push origin main; then
+  echo "[auto-deploy] push 완료 — Render 재배포가 시작됩니다."
+else
+  echo "[auto-deploy] push 실패. 커밋은 유지되었으니 직접 'git push origin main' 하세요." >&2
+fi
+
+exit 0
