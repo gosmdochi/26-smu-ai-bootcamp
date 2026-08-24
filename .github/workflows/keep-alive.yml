@@ -31,11 +31,13 @@ jobs:
         env:
           SERVICE_URL: ${{ vars.SERVICE_URL }}
         run: |
+          # 아직 배포 전이라 URL이 없을 수 있습니다. 이때 실패시키면 5분마다 알림이 오므로
+          # 경고만 남기고 넘어갑니다.
           if [ -z "$SERVICE_URL" ]; then
-            echo "::error::SERVICE_URL 저장소 변수가 설정되지 않았습니다."
+            echo "::warning::SERVICE_URL 저장소 변수가 없어 핑을 건너뜁니다."
             echo "Settings > Secrets and variables > Actions > Variables 에서"
             echo "SERVICE_URL = https://<서비스명>.onrender.com 을 추가하세요."
-            exit 1
+            exit 0
           fi
 
           # 슬립에서 깨어나는 데 30초 이상 걸릴 수 있어 넉넉히 기다리고 재시도합니다.
