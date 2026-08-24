@@ -1,0 +1,29 @@
+# Render Blueprint
+# https://render.com/docs/blueprint-spec
+#
+# 이 파일이 저장소에 있으면 Render 대시보드에서 "New > Blueprint"로 GitHub 저장소를
+# 연결하는 것만으로 아래 서비스가 그대로 생성됩니다.
+# autoDeploy: true 이므로 main 브랜치에 push될 때마다 자동으로 재배포됩니다.
+
+services:
+  - type: web
+    name: cheongnyeon-housing
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      # sync: false → 값은 커밋하지 않고 Render 대시보드에서 직접 입력합니다.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: SUPABASE_DB_URL
+        sync: false
+      - key: PYTHONUTF8
+        value: "1"

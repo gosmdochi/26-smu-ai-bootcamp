@@ -7,29 +7,38 @@ name = "ai-service-rag"
 version = "1.0.0"
 description = "상명대 계절학기 프로그램 AI 서비스 실무 개발 과정"
 requires-python = ">=3.11,<3.14"
+# 배포된 웹 서비스(src/api + src/ai)가 실제로 import하는 패키지만 둡니다.
+# 노트북·Streamlit 데모·데이터 적재용 패키지는 아래 [dependency-groups].dev 로 분리했습니다.
+# `uv sync`는 dev 그룹까지 함께 설치하므로 로컬 개발 환경은 그대로입니다.
+# Docker 이미지는 `uv sync --no-dev`로 런타임 의존성만 설치합니다.
 dependencies = [
     "langchain>=1.2.0",
     "langchain-openai>=1.1.0",
     "langchain-core>=1.2.0",
     "langchain-community>=0.4.0",
-    "langgraph-cli[inmem]>=0.4.0",
     "langgraph>=1.0.0",
-    "python-dotenv>=1.0.0",
-    "jupyter>=1.1.0",
-    "ipykernel>=6.29.0",
-    "pydantic>=2.0.0",
-    "typing-extensions>=4.12.0",
-    "langchain-mcp-adapters>=0.2.0",
     "langchain-qdrant>=0.3.0",
-    "PyMuPDF>=1.27.0",
     "qdrant-client>=1.11.0",
     "sqlalchemy>=2.0.0",
     "psycopg2-binary>=2.9.0",
-    "pandas>=2.0.0",
-    "streamlit>=1.40.0",
-    "supabase>=2.31.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.12.0",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0"
+]
+
+[dependency-groups]
+# 로컬 개발 전용: 노트북(day2~4), Streamlit 데모, PDF/CSV 적재, langgraph dev 서버
+dev = [
+    "jupyter>=1.1.0",
+    "ipykernel>=6.29.0",
+    "langgraph-cli[inmem]>=0.4.0",
+    "langchain-mcp-adapters>=0.2.0",
+    "PyMuPDF>=1.27.0",
+    "pandas>=2.0.0",
+    "streamlit>=1.40.0",
+    "supabase>=2.31.0"
 ]
 
 [tool.setuptools.packages.find]
