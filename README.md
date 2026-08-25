@@ -8,7 +8,8 @@
 
 ## 📸 데모 화면
 
-![챗봇 데모 화면](docs/demo.png)
+<img width="1280" height="674" alt="image" src="https://github.com/user-attachments/assets/84c2f6a1-db92-4133-9c94-342754a5ee3a" />
+
 
 > 좌측 사이드바에서 예시 질문을 클릭하면 우측 채팅창에 답변이 스트리밍되며, 답변 하단에서 분류된 의도·검색된 공고문 청크(카테고리/페이지)·실행된 SQL을 펼쳐볼 수 있습니다.
 
